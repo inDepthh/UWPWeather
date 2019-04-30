@@ -33,13 +33,11 @@ namespace UWPWeather
             var position = await LocationManager.GetPosition();
 
             RootObject myWeather = 
-                await OpenWeatherMapProxy.GetWeather(
-                    position.Coordinate.Latitude, 
-                    position.Coordinate.Longitude);
+                await OpenWeatherMapProxy.GetWeather();
 
             string icon = String.Format("ms-appx:///Assets/Weather/{0}.png", myWeather.weather[0].icon);
             ResultImage.Source = new BitmapImage(new Uri(icon, UriKind.Absolute));
-            ResultTextBlock.Text = myWeather.name + " - " + ((int)myWeather.main.temp).ToString() + " - " + myWeather.weather[0].description;
+            ResultTextBlock.Text = myWeather.name + " - " + ((int)myWeather.main.temp).ToString() + " - " + myWeather.weather[0].description + " - " + myWeather.main.humidity + " - " + myWeather.clouds.all;
         }
     }
 }

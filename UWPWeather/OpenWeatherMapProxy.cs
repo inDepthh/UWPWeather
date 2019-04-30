@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -12,16 +13,17 @@ namespace UWPWeather
 {
     public class OpenWeatherMapProxy
     {
-        public async static Task<RootObject> GetWeather(double lat, double lon)
+        public async static Task<RootObject> GetWeather()
         {
             var http = new HttpClient();
-            var response = await http.GetAsync("http://api.openweathermap.org/data/2.5/weather?lat=32.77&lon=-96.79&APPID=c9d011491e62bd4543d10a8a9669a9c1");
+            var response = await http.GetAsync("http://api.openweathermap.org/data/2.5/weather?q=candia,us&units=imperial&APPID=c9d011491e62bd4543d10a8a9669a9c1");
             var result = await response.Content.ReadAsStringAsync();
             var serializer = new DataContractJsonSerializer(typeof(RootObject));
 
             var ms = new MemoryStream(Encoding.UTF8.GetBytes(result));
             var data = (RootObject)serializer.ReadObject(ms);
 
+            Debug.WriteLine("Data: "+ data.main);
             return data;
         }
     }

@@ -1,0 +1,11 @@
+DROP DATABASE IF EXISTS "Weather";
+
+CREATE DATABASE "Weather";
+
+DROP TABLE IF EXISTS "Data";
+
+CREATE TABLE "Data" (
+	DataID			INT				NOT NULL IDENTITY (1,1),
+	[Location]		VARCHAR(50)		NOT NULL,
+	Temperature		float			NOT NULL
+)
