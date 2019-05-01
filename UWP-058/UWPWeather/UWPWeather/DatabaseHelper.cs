@@ -2,13 +2,15 @@
 using System.Data.SqlClient;
 using System.Data;
 using System.Collections;
+using System.Collections.ObjectModel;
+using System;
 
 namespace UWPWeather
 {
     class DatabaseHelper
     {
 
-        public void updateWeather(string Column)
+        public void updateWeather(string Column, string ConnectionString)
         {
             SqlConnection cn = new SqlConnection();
             DataSet dataSet = new DataSet();
@@ -16,7 +18,7 @@ namespace UWPWeather
             SqlCommandBuilder cmdBuilder;
 
             //cn.ConnectionString = "Data Source=DESKTOP-J1CRMQR;Initial Catalog=Weather;Integrated Security=SSPI";
-            cn.ConnectionString = "Data Source=DESKTOP-J1CRMQR; Initial Catalog=Weather; User id=sa; Password=sapassword123;";
+            cn.ConnectionString = ConnectionString;
             cn.Open();
 
              da = new SqlDataAdapter("SELECT * FROM dbo.Data", cn);
@@ -40,17 +42,53 @@ namespace UWPWeather
             cn.Close();
         }
 
-        public void InsertWeather(string Location, string Temperature)
+        public ObservableCollection<WeatherDB> FetchWeather(string connectionString, string Location, float Temperature)
         {
-            string strConnect = "Data Source=localhost;Initial Catalog=Weather;Integrated Security=True";
+            const string GetWeatherQuery = "select Location, Temperature FROM Data";
+
+            var weatherData = new ObservableCollection<WeatherDB>();
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+                    if (conn.State == System.Data.ConnectionState.Open)
+                    {
+                        using (SqlCommand cmd = conn.CreateCommand())
+                        {
+                            cmd.CommandText = GetWeatherQuery;
+                            using (SqlDataReader reader = cmd.ExecuteReader())
+                            {
+                                while (reader.Read())
+                                {
+                                    var data = new WeatherDB(Location, Temperature);
+                                    data.Location= reader.GetString(0);
+                                    data.Temperature = reader.GetFloat(1);
+                                }
+                            }
+                        }
+                    }
+                }
+                return weatherData;
+            }
+            catch (Exception eSql)
+            {
+                Debug.WriteLine("Exception: " + eSql.Message);
+            }
+            return null;
+        }
+
+        public void InsertWeather(string Location, float Temperature, string connectionString)
+        {
+            //string strConnect = "Data Source=localhost;Initial Catalog=Weather;Integrated Security=True";
             SqlConnection conn = null;
             try
             {
-                conn = new SqlConnection(strConnect);
+                conn = new SqlConnection(connectionString);
                 conn.Open();
 
                 //populate Weather data
-                WeatherDB weather1 = new WeatherDB("Candia", 12);
+                WeatherDB weather1 = new WeatherDB(Location, Temperature);
                 SaveWeather(new WeatherDB[] { weather1 }, conn);
 
             }
@@ -91,9 +129,9 @@ namespace UWPWeather
     public class WeatherDB
     {
         public string Location { get; set; }
-        public int Temperature { get; set; }
+        public float Temperature { get; set; }
 
-        public WeatherDB(string Location, int Temperature)
+        public WeatherDB(string Location, float Temperature)
         {
             this.Location = Location;
             this.Temperature = Temperature;
