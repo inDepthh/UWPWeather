@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Data.SqlClient;
 using System.Data;
+using System.Collections.ObjectModel;
+using System;
 
 namespace UWPWeather
 {
@@ -39,6 +41,42 @@ namespace UWPWeather
 
             //Close the database connection.
             cn.Close();
+        }
+
+        public ObservableCollection<WeatherDB> FetchWeather(string connectionString, string Location, float Temperature)
+        {
+            const string GetWeatherQuery = "select Location, Temperature FROM Data";
+
+            var weatherData = new ObservableCollection<WeatherDB>();
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+                    if (conn.State == System.Data.ConnectionState.Open)
+                    {
+                        using (SqlCommand cmd = conn.CreateCommand())
+                        {
+                            cmd.CommandText = GetWeatherQuery;
+                            using (SqlDataReader reader = cmd.ExecuteReader())
+                            {
+                                while (reader.Read())
+                                {
+                                    var data = new WeatherDB(Location, Temperature);
+                                    data.Location= reader.GetString(0);
+                                    data.Temperature = reader.GetFloat(1);
+                                }
+                            }
+                        }
+                    }
+                }
+                return weatherData;
+            }
+            catch (Exception eSql)
+            {
+                Debug.WriteLine("Exception: " + eSql.Message);
+            }
+            return null;
         }
 
         public void InsertWeather()
@@ -92,9 +130,9 @@ namespace UWPWeather
     public class WeatherDB
     {
         public string Location { get; set; }
-        public int Temperature { get; set; }
+        public float Temperature { get; set; }
 
-        public WeatherDB(string Location, int Temperature)
+        public WeatherDB(string Location, float Temperature)
         {
             this.Location = Location;
             this.Temperature = Temperature;
