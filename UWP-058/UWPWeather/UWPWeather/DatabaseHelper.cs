@@ -1,13 +1,14 @@
 ﻿using System.Diagnostics;
 using System.Data.SqlClient;
 using System.Data;
+using System.Collections;
 
 namespace UWPWeather
 {
     class DatabaseHelper
     {
 
-        public void fetchData(string Location, string Temperature, string Column)
+        public void updateWeather(string Column)
         {
             SqlConnection cn = new SqlConnection();
             DataSet dataSet = new DataSet();
@@ -34,14 +35,12 @@ namespace UWPWeather
 
             //Post the data modification to the database.
             da.Update(dataSet, "Data");
-
+            
             Debug.WriteLine("Data updated successfully");
-
-            //Close the database connection.
             cn.Close();
         }
 
-        public void InsertWeather()
+        public void InsertWeather(string Location, string Temperature)
         {
             string strConnect = "Data Source=localhost;Initial Catalog=Weather;Integrated Security=True";
             SqlConnection conn = null;

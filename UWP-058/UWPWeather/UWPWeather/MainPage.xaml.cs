@@ -42,7 +42,7 @@ namespace UWPWeather
             ResultTextBlock.Text = myWeather.name + " - " + ((int)myWeather.main.temp).ToString() + " - " + myWeather.weather[0].description;
 
             DatabaseHelper databaseHelper = new DatabaseHelper();
-            databaseHelper.fetchData(myWeather.name, myWeather.main.temp.ToString(), "Temperature");
+            databaseHelper.fetchData("Temperature");
         }
     }
 }
