@@ -14,10 +14,11 @@ namespace UWPWeather
             SqlDataAdapter da;
             SqlCommandBuilder cmdBuilder;
 
-            cn.ConnectionString = "Data Source=DESKTOP-J1CRMQR;Initial Catalog=Weather;Integrated Security=True";
+            cn.ConnectionString = "Data Source=DESKTOP-J1CRMQR;Initial Catalog=Weather;Integrated Security=SSPI";
+            //cn.ConnectionString = "Data Source=DESKTOP-J1CRMQR; Initial Catalog=Weather; User id=weather; Password=weather;";
             cn.Open();
 
-            da = new SqlDataAdapter("SELECT * FROM dbo.Data", cn);
+             da = new SqlDataAdapter("SELECT * FROM dbo.Data", cn);
 
             //the UpdateCommand, InsertCommand, and DeleteCommand properties of the SqlDataAdapter.
             cmdBuilder = new SqlCommandBuilder(da);
