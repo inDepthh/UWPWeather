@@ -13,7 +13,7 @@ namespace UWPWeather
         {
             var accessStatus = await Geolocator.RequestAccessAsync();
 
-            if (accessStatus != GeolocationAccessStatus.Allowed) throw new Exception();
+            if (accessStatus != GeolocationAccessStatus.Allowed) throw new Exception("Location access denied - Do you have Location Services enabled?");
 
             var geolocator = new Geolocator { DesiredAccuracyInMeters = 0 };
 
