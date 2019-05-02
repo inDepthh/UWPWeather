@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -24,6 +25,8 @@ namespace UWPWeather
         public MainPage()
         {
             this.InitializeComponent();
+            
+
         }
 
         DatabaseHelper databaseHelper = new DatabaseHelper();
@@ -42,11 +45,12 @@ namespace UWPWeather
             Debug.WriteLine("Country: " + country);
 
             progressRing.IsActive = true;
+            ResultTextBlock.Text = "Loading...";
             var position = await LocationManager.GetPosition();
 
             if (autoDetect)
             {
-                ResultTextBlock.Text = "Loading...";
+               
                 myWeather = await OpenWeatherMapProxy.GetWeather(position.Coordinate.Latitude, position.Coordinate.Longitude);
             }
             else
@@ -58,38 +62,26 @@ namespace UWPWeather
             {
                 progressRing.IsActive = false;
                 ResultTextBlock.Foreground = new SolidColorBrush(Colors.Black);
-                ResultTextBlock.Text = myWeather.name + " - " + ((int)myWeather.main.temp).ToString() + " - " + myWeather.weather[0].description;
+                ResultTextBlock.Text = "Location: " + myWeather.name + ", "+ myWeather.sys.country + ", Temperature: " + ((int)myWeather.main.temp).ToString() + ", " + myWeather.weather[0].description +
+                    ", Humidity: " + myWeather.main.humidity + ", Wind Speed: " + myWeather.wind.speed + ", Sunrise: " + myWeather.sys.sunrise + ", Sunset: " + myWeather.sys.sunset;
 
             } catch(Exception ex)
             {
                 Debug.WriteLine("Exception: " + ex.StackTrace);
                 progressRing.IsActive = false;
                 ResultTextBlock.Foreground = new SolidColorBrush(Colors.Red);
-                ResultTextBlock.Text = "Error: Please check your spelling and formatting";
+                ResultTextBlock.Text = "Error: Please check your spelling and format";
             }
-                      
-
-         
-
-                       
-
-            // string icon = String.Format("ms-appx:///Assets/Weather/{0}.png", myWeather.weather[0].icon);
-            // ResultImage.Source = new BitmapImage(new Uri(icon, UriKind.Absolute));
         }
 
-
-
-        public void InsertData()
+        public void InsertData(string data)
         {
-            //databaseHelper.InsertWeather("New York", 80);
-            //databaseHelper.InsertWeather("Mars", 10000);
-            //databaseHelper.InsertWeather("Canada", 3);
-            //databaseHelper.InsertWeather("Australia", 800);
+            databaseHelper.InsertWeather(data, 80);
         }
 
-        public void GetData()
+        public ObservableCollection<WeatherDB> GetData()
         {
-            //databaseHelper.fetchWeather();
+            return databaseHelper.fetchWeather();
         }
 
         public void UpdateData()
@@ -110,6 +102,39 @@ namespace UWPWeather
         private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
             autoDetect = false;
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            string city = textBoxCity.Text;
+            Debug.WriteLine("City: " + city);
+
+            string country = textBoxCountry.Text;
+            Debug.WriteLine("Country: " + country);
+
+            string data = city + ", " + country;
+           // InsertData(data);
+
+            //string fetch = GetData()[0].ToString();
+            WeatherDB weatherdb = new WeatherDB();
+            //string location = weatherdb.Location[0].ToString();
+            Debug.WriteLine("Fetched location: " + weatherdb.Location.Count);
+
+            //SavedAddresses saveAddress = new SavedAddresses();
+           // saveAddress.Address.Add(location);
+           
+            listView.ItemsSource = GetData();
+
+            
+
+            
+        //List<string> saveAdress = (runtimeObject) new List<string>();
+        //saveAddress.Address.Add("one");
+        //    saveAddress.Address.Add("two");
+        //    saveAddress.Address.Add("three");
+        //    saveAddress.Address.Add("four");
+        //    saveAddress.Address.Add("five");
+            //Debug.WriteLine("saveAddresses: " + saveAddress.Address);
         }
     }
 }

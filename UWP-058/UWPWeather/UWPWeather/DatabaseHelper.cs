@@ -58,15 +58,17 @@ namespace UWPWeather
                             {
                                 while (reader.Read())
                                 {
-                                    var weather = new WeatherDB();
-
                                     string stringData = reader.GetString(0);
                                     double doubleData = reader.GetDouble(1);
                                     Debug.WriteLine(stringData);
                                     Debug.WriteLine(doubleData);
 
-                                    weather.Location.Add(stringData);
-                                    weather.Temperature.Add(doubleData);
+                                    var weather = new WeatherDB(stringData, doubleData);
+
+                                   // weather.Location.Add(stringData);
+                                   // weather.Temperature.Add(doubleData);
+
+                                   // weatherData.Add(stringData);
                                     //Debug.WriteLine("Location: " + data.Location.Count + " Temperature: " + data.Temperature.Count);
                                 }
                             }
@@ -75,13 +77,13 @@ namespace UWPWeather
                     conn.Close();
                 }
                 
-                return weatherData;
+                //return weatherData;
             }
             catch (Exception eSql)
             {
                 Debug.WriteLine("Exception: " + eSql.StackTrace);
             }
-            return null;
+            return weatherData;
            
         }
 
@@ -163,13 +165,13 @@ namespace UWPWeather
 
     public class WeatherDB
     {
-        public ArrayList Location { get; set; }
-        public ArrayList Temperature { get; set; }
+        public ObservableCollection<string> Location { get; set; }
+        public ObservableCollection<double> Temperature{ get; set; }
 
         public WeatherDB(string Location, double Temperature)
         {
-            this.Location = new ArrayList();
-            this.Temperature = new ArrayList();
+            this.Location = new ObservableCollection<string>();
+            this.Temperature = new ObservableCollection<double>();
 
             this.Location.Add(Location);
             this.Temperature.Add(Temperature);
@@ -177,8 +179,6 @@ namespace UWPWeather
 
         public WeatherDB()
         {
-            Location = new ArrayList();
-            Temperature = new ArrayList();
         }
     }
 }
