@@ -32,6 +32,7 @@ namespace UWPWeather
 
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
+            
             RootObject myWeather = null;
 
             string city = textBoxCity.Text;
@@ -40,24 +41,23 @@ namespace UWPWeather
             string country = textBoxCountry.Text;
             Debug.WriteLine("Country: " + country);
 
+            progressRing.IsActive = true;
             var position = await LocationManager.GetPosition();
 
             if (autoDetect)
             {
-                progressRing.IsActive = true;
                 ResultTextBlock.Text = "Loading...";
                 myWeather = await OpenWeatherMapProxy.GetWeather(position.Coordinate.Latitude, position.Coordinate.Longitude);
             }
             else
             {
-                progressRing.IsActive = true;
-                myWeather = await OpenWeatherMapProxy.GetWeather(city, country);
+               myWeather = await OpenWeatherMapProxy.GetWeather(city, country);
             }
 
             try
             {
-                ResultTextBlock.Foreground = new SolidColorBrush(Colors.Black);
                 progressRing.IsActive = false;
+                ResultTextBlock.Foreground = new SolidColorBrush(Colors.Black);
                 ResultTextBlock.Text = myWeather.name + " - " + ((int)myWeather.main.temp).ToString() + " - " + myWeather.weather[0].description;
 
             } catch(Exception ex)
