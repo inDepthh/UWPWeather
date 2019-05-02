@@ -44,20 +44,26 @@ namespace UWPWeather
 
             if (autoDetect)
             {
+                progressRing.IsActive = true;
+                ResultTextBlock.Text = "Loading...";
                 myWeather = await OpenWeatherMapProxy.GetWeather(position.Coordinate.Latitude, position.Coordinate.Longitude);
             }
             else
             {
+                progressRing.IsActive = true;
                 myWeather = await OpenWeatherMapProxy.GetWeather(city, country);
             }
 
             try
             {
                 ResultTextBlock.Foreground = new SolidColorBrush(Colors.Black);
+                progressRing.IsActive = false;
                 ResultTextBlock.Text = myWeather.name + " - " + ((int)myWeather.main.temp).ToString() + " - " + myWeather.weather[0].description;
+
             } catch(Exception ex)
             {
                 Debug.WriteLine("Exception: " + ex.StackTrace);
+                progressRing.IsActive = false;
                 ResultTextBlock.Foreground = new SolidColorBrush(Colors.Red);
                 ResultTextBlock.Text = "Error: Please check your spelling and formatting";
             }
