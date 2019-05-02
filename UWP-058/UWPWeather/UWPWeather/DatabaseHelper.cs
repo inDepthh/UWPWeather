@@ -9,21 +9,19 @@ namespace UWPWeather
 {
     class DatabaseHelper
     {
-
-        public void updateWeather(string Column, string ConnectionString)
+        string connectionString = "Data Source=DESKTOP-J1CRMQR; Initial Catalog=Weather; User id=sa; Password=sapassword123;";
+        public void updateWeather(string Column)
         {
             SqlConnection cn = new SqlConnection();
             DataSet dataSet = new DataSet();
             SqlDataAdapter da;
             SqlCommandBuilder cmdBuilder;
 
-            //cn.ConnectionString = "Data Source=DESKTOP-J1CRMQR;Initial Catalog=Weather;Integrated Security=SSPI";
-            cn.ConnectionString = ConnectionString;
+            cn.ConnectionString = connectionString;
             cn.Open();
 
              da = new SqlDataAdapter("SELECT * FROM dbo.Data", cn);
 
-            //the UpdateCommand, InsertCommand, and DeleteCommand properties of the SqlDataAdapter.
             cmdBuilder = new SqlCommandBuilder(da);
 
             //Populate the DataSet
@@ -35,14 +33,13 @@ namespace UWPWeather
             //Modify the value of the Temperature field.
             dataSet.Tables["Data"].Rows[0][Column] = 45;
 
-            //Post the data modification to the database.
             da.Update(dataSet, "Data");
             
             Debug.WriteLine("Data updated successfully");
             cn.Close();
         }
 
-        public ObservableCollection<WeatherDB> FetchWeather(string connectionString, string Location, float Temperature)
+        public ObservableCollection<WeatherDB> fetchWeather()
         {
             const string GetWeatherQuery = "select Location, Temperature FROM Data";
 
@@ -61,26 +58,35 @@ namespace UWPWeather
                             {
                                 while (reader.Read())
                                 {
-                                    var data = new WeatherDB(Location, Temperature);
-                                    data.Location= reader.GetString(0);
-                                    data.Temperature = reader.GetFloat(1);
+                                    var weather = new WeatherDB();
+
+                                    string stringData = reader.GetString(0);
+                                    double doubleData = reader.GetDouble(1);
+                                    Debug.WriteLine(stringData);
+                                    Debug.WriteLine(doubleData);
+
+                                    weather.Location.Add(stringData);
+                                    weather.Temperature.Add(doubleData);
+                                    //Debug.WriteLine("Location: " + data.Location.Count + " Temperature: " + data.Temperature.Count);
                                 }
                             }
                         }
                     }
+                    conn.Close();
                 }
+                
                 return weatherData;
             }
             catch (Exception eSql)
             {
-                Debug.WriteLine("Exception: " + eSql.Message);
+                Debug.WriteLine("Exception: " + eSql.StackTrace);
             }
             return null;
+           
         }
 
-        public void InsertWeather(string Location, float Temperature, string connectionString)
+        public void InsertWeather(string Location, double Temperature)
         {
-            //string strConnect = "Data Source=localhost;Initial Catalog=Weather;Integrated Security=True";
             SqlConnection conn = null;
             try
             {
@@ -88,14 +94,14 @@ namespace UWPWeather
                 conn.Open();
 
                 //populate Weather data
-                WeatherDB weather1 = new WeatherDB(Location, Temperature);
-                SaveWeather(new WeatherDB[] { weather1 }, conn);
+                WeatherDB weather = new WeatherDB(Location, Temperature);
+                SaveWeather(new WeatherDB[] { weather }, conn);
 
             }
             catch (SqlException ex)
             {
-                Debug.WriteLine("Failed: {0}", ex.Message.ToString());
-                Debug.WriteLine("Failed: {0}", ex.ToString());
+                Debug.WriteLine("Failed: {0}", ex.StackTrace);
+                //Debug.WriteLine("Failed: {0}", ex.ToString());
             }
             finally
             {
@@ -117,24 +123,77 @@ namespace UWPWeather
 
             foreach (WeatherDB t in aWeather)
             {
-                comm.Parameters["@Location"].Value = t.Location;
-                comm.Parameters["@Temperature"].Value = t.Temperature;
+                comm.Parameters["@Location"].Value = t.Location[0];
+                comm.Parameters["@Temperature"].Value = t.Temperature[0];
                 comm.ExecuteNonQuery();
 
-                Debug.Write("Inserted Location {0}", t.Location);
+                Debug.Write("Inserted Location {0}", t.Location[0].ToString());
             }
+        }
+
+        public void deleteWeather()
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                SqlDataAdapter rdr = new SqlDataAdapter("SELECT Location FROM Data", conn);
+                SqlCommandBuilder cmdBuilder = new SqlCommandBuilder(rdr);
+                DataSet dataSet = new DataSet();
+                SqlCommand cmd = new SqlCommand("DELETE FROM Data WHERE Location = @location", rdr.SelectCommand.Connection);
+                cmd.Parameters.Add(new SqlParameter("@location", SqlDbType.VarChar, 50));
+                cmd.Parameters["@location"].SourceVersion = DataRowVersion.Original;
+                cmd.Parameters["@location"].SourceColumn = "location";
+                rdr.DeleteCommand = cmd;
+                rdr.Fill(dataSet, "Data");
+                //Debug.WriteLine(cmdBuilder.GetDeleteCommand().CommandText);
+                foreach (DataRow row in dataSet.Tables["Data"].Rows)
+                {
+                   // if (dataSet.Tables["Data"].Rows[0] == (DataRow) deleteLocation[0])
+                  //  {
+                        Debug.WriteLine("row: " + row[0]);
+                        row.Delete();
+                   // }
+                    
+                }
+                rdr.Update(dataSet, "Data");
+                conn.Close();
+            }
+                
+        }
+
+        private SqlDataAdapter DataAdapter(SqlConnection connection)
+        {
+            SqlDataAdapter adapter = new SqlDataAdapter();
+
+            //Determines the action to take when existing DataSet schema does not match incoming data.
+            adapter.MissingSchemaAction = MissingSchemaAction.AddWithKey;
+
+            adapter.DeleteCommand = new SqlCommand("DELETE FROM Data WHERE Locaton = 'New York'", connection);
+
+           // adapter.DeleteCommand.Parameters.Add("@Location", SqlDbType.VarChar, 50).SourceVersion = DataRowVersion.Original;
+
+            return adapter;
         }
     }
 
     public class WeatherDB
     {
-        public string Location { get; set; }
-        public float Temperature { get; set; }
+        public ArrayList Location { get; set; }
+        public ArrayList Temperature { get; set; }
 
-        public WeatherDB(string Location, float Temperature)
+        public WeatherDB(string Location, double Temperature)
         {
-            this.Location = Location;
-            this.Temperature = Temperature;
+            this.Location = new ArrayList();
+            this.Temperature = new ArrayList();
+
+            this.Location.Add(Location);
+            this.Temperature.Add(Temperature);
+        }
+
+        public WeatherDB()
+        {
+            Location = new ArrayList();
+            Temperature = new ArrayList();
         }
     }
 }

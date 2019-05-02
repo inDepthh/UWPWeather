@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -33,16 +34,25 @@ namespace UWPWeather
             var position = await LocationManager.GetPosition();
 
             RootObject myWeather =
-#pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable CS0618
                 await OpenWeatherMapProxy.GetWeather(position.Coordinate.Latitude, position.Coordinate.Longitude);
-#pragma warning restore CS0618 // Type or member is obsolete
+#pragma warning restore CS0618
 
             string icon = String.Format("ms-appx:///Assets/Weather/{0}.png", myWeather.weather[0].icon);
             ResultImage.Source = new BitmapImage(new Uri(icon, UriKind.Absolute));
             ResultTextBlock.Text = myWeather.name + " - " + ((int)myWeather.main.temp).ToString() + " - " + myWeather.weather[0].description;
 
             DatabaseHelper databaseHelper = new DatabaseHelper();
-            databaseHelper.fetchData("Temperature");
+            databaseHelper.InsertWeather("New York", 80);
+            databaseHelper.InsertWeather("Mars", 10000);
+            databaseHelper.InsertWeather("Canada", 3);
+            databaseHelper.InsertWeather("Australia", 800);
+            //databaseHelper.fetchWeather();
+            //databaseHelper.updateWeather("Temperature");
+            //ArrayList list = new ArrayList();
+            //list.Add("Australia");
+
+            databaseHelper.deleteWeather();
         }
     }
 }
