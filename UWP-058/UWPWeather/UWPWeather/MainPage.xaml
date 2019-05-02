@@ -5,11 +5,30 @@
     xmlns:local="using:UWPWeather"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    mc:Ignorable="d" Width="950" Height="757">
 
-    <StackPanel Background="HotPink">
-        <Button Content="Get Weather" Click="Button_Click" />
-        <TextBlock Name="ResultTextBlock" />
-        <Image Name="ResultImage" Width="200" Height="200" />
+    <StackPanel Background="Black">
+        <StackPanel Height="596" HorizontalAlignment="Center" Width="583" Background="#d9f5f9"  Margin="0 75 0 0">
+            <ListView Header="Enter a location" BorderThickness="1" BorderBrush="Red" Height="590" HorizontalAlignment="Stretch">
+                <ListView.HeaderTemplate>
+                    <DataTemplate>
+                        <ListViewHeaderItem Content="{Binding}" FontSize="48"/>
+                    </DataTemplate>
+                </ListView.HeaderTemplate>
+
+                <TextBlock TextWrapping="Wrap" Margin="0 23 0 0" Text="City:" FontSize="24"/>
+
+                <TextBox x:Name="textBoxCity" Text="" Width="236" Height="28" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+                <TextBlock Text="Country" TextWrapping="Wrap" Margin="0 23 0 0" FontSize="24"/>
+                <TextBox x:Name="textBoxCountry" Text="&#xA;" Width="239" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+                <CheckBox Content="Auto Detect Current Location" HorizontalAlignment="Left" VerticalAlignment="Top" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
+                <TextBlock />
+                <TextBlock Text="" TextWrapping="Wrap"/>
+                <Button Content="Get Weather" Click="Button_Click" HorizontalAlignment="Center" VerticalAlignment="Center" Height="57" Width="594" FontSize="24" Margin="0,0,0,0" />
+                <TextBlock x:Name="ResultTextBlock" Width="555" Height="66" FontSize="24"/>
+
+            </ListView>
+        </StackPanel>
+
     </StackPanel>
 </Page>

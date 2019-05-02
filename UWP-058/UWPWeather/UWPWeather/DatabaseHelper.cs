@@ -158,21 +158,6 @@ namespace UWPWeather
                 rdr.Update(dataSet, "Data");
                 conn.Close();
             }
-                
-        }
-
-        private SqlDataAdapter DataAdapter(SqlConnection connection)
-        {
-            SqlDataAdapter adapter = new SqlDataAdapter();
-
-            //Determines the action to take when existing DataSet schema does not match incoming data.
-            adapter.MissingSchemaAction = MissingSchemaAction.AddWithKey;
-
-            adapter.DeleteCommand = new SqlCommand("DELETE FROM Data WHERE Locaton = 'New York'", connection);
-
-           // adapter.DeleteCommand.Parameters.Add("@Location", SqlDbType.VarChar, 50).SourceVersion = DataRowVersion.Original;
-
-            return adapter;
         }
     }
 
